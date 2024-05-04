@@ -1,10 +1,37 @@
-use std::io::Write;
+use std::collections::HashMap;
+use std::fmt::Error;
+use std::io::{Read, Write};
 // Uncomment this block to pass the first stage
 use std::net::TcpListener;
 
+#[derive(Debug)]
+struct HttpRequest {
+    method: String,
+    path: String,
+    http_version: String,
+    headers: HashMap<String, String>
+}
+
+fn parse_request(string: &str) -> Result<HttpRequest, Error> {
+    let mut lines = string.split("\r\n");
+    let fe = lines.next().ok_or(Error)?;
+    let method = fe.split(" ").nth(0).ok_or(Error)?;
+    let path = fe.split(" ").nth(0).ok_or(Error)?;
+    let http_version = fe.split(" ").nth(0).ok_or(Error)?;
+    println!("za");
+    let mut map = HashMap::new();
+    while let Some(l) = lines.next() {
+        if l.is_empty() {
+            break
+        }
+        let (a, b) = l.split_once(" ").ok_or(Error)?;
+        map.insert(a.to_string(), b.to_string());
+    }
+   Ok (HttpRequest {
+        method: method.to_string(), path: path.to_string(), http_version: http_version.to_string(), headers: map
+    })
+}
 fn main() {
-    // You can use print statements as follows for debugging, they'll be visible when running tests.
-    println!("Logs from your program will appear here!");
 
     // Uncomment this block to pass the first stage
     //
@@ -14,7 +41,26 @@ fn main() {
         match stream {
             Ok(mut _stream) => {
                  println!("accepted new connection");
-                _stream.write(b"HTTP/1.1 200 OK\r\n\r\n").expect("TODO: panic message");
+                let mut rx_bytes = [0u8; 1024];
+                _stream.read(&mut rx_bytes).expect("TODO: panic message");
+                let string = std::str::from_utf8(&rx_bytes).expect("valid utf8");
+
+
+                let request = parse_request(string);
+                if let Ok(re) = request {
+
+                    match re.path.as_str() {
+                        "/" => {
+                            _stream.write(b"HTTP/1.1 200 OK\r\n\r\n").expect("TODO: panic message");
+
+                        }
+                        _ => {
+                            _stream.write(b"HTTP/1.1 404 Not Found\r\n\r\n").expect("TODO: panic message");
+                        }
+                    }
+                } else {
+                    println!("Parse Error");
+                }
             }
             Err(e) => {
                  println!("error: {}", e);
