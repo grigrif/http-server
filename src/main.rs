@@ -16,8 +16,8 @@ fn parse_request(string: &str) -> Result<HttpRequest, Error> {
     let mut lines = string.split("\r\n");
     let fe = lines.next().ok_or(Error)?;
     let method = fe.split(" ").nth(0).ok_or(Error)?;
-    let path = fe.split(" ").nth(0).ok_or(Error)?;
-    let http_version = fe.split(" ").nth(0).ok_or(Error)?;
+    let path = fe.split(" ").nth(1).ok_or(Error)?;
+    let http_version = fe.split(" ").nth(2).ok_or(Error)?;
     println!("za");
     let mut map = HashMap::new();
     while let Some(l) = lines.next() {
@@ -48,7 +48,7 @@ fn main() {
 
                 let request = parse_request(string);
                 if let Ok(re) = request {
-
+                    dbg!(&re);
                     match re.path.as_str() {
                         "/" => {
                             _stream.write(b"HTTP/1.1 200 OK\r\n\r\n").expect("TODO: panic message");
