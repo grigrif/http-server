@@ -13,7 +13,8 @@ struct HttpRequest {
     method: String,
     path: String,
     http_version: String,
-    headers: HashMap<String, String>
+    headers: HashMap<String, String>,
+    body: String
 }
 
 fn parse_request(string: &str) -> Result<HttpRequest, Error> {
@@ -31,8 +32,9 @@ fn parse_request(string: &str) -> Result<HttpRequest, Error> {
         let (a, b) = l.split_once(" ").ok_or(Error)?;
         map.insert(a.to_string(), b.to_string());
     }
+    let body = lines.collect();
    Ok (HttpRequest {
-        method: method.to_string(), path: path.to_string(), http_version: http_version.to_string(), headers: map
+        method: method.to_string(), path: path.to_string(), http_version: http_version.to_string(), headers: map, body
     })
 }
 
@@ -82,20 +84,28 @@ fn main() {
                         _stream.write(m.as_bytes()).unwrap();
                     }
                     else if re.path.starts_with("/files/") {
-                        let str = &re.path[7..];
-                        let mut file = File::open(format!("{}/{}", directory.clone() ,str));
-                        if let Ok(mut fe) = file {
-                            let mut contents = String::new();
-                            fe.read_to_string(&mut contents).expect("TODO: panic message");
-                            let resp = format!(
-                                "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: {}\r\n\r\n{}",
-                                contents.len(),
-                                contents
-                            );
-                            _stream.write(resp.as_bytes()).expect("");
+                        if re.method == "GET" {
+                            let str = &re.path[7..];
+                            let mut file = File::open(format!("{}/{}", directory.clone(), str));
+                            if let Ok(mut fe) = file {
+                                let mut contents = String::new();
+                                fe.read_to_string(&mut contents).expect("TODO: panic message");
+                                let resp = format!(
+                                    "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: {}\r\n\r\n{}",
+                                    contents.len(),
+                                    contents
+                                );
+                                _stream.write(resp.as_bytes()).expect("");
+                            }
 
 
-                        } else {
+                        } else if re.method == "POST" {
+                            dbg!("azdadz");
+                            let str = &re.path[7..];
+                            let mut file = File::create(format!("{}/{}", directory.clone(), str)).unwrap();
+                            file.write_all(re.body.as_ref()).expect("TODO: panic message");
+
+                        }else {
                             _stream.write(not_found()).expect("TODO: panic message");
                         }
 
