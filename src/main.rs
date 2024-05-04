@@ -104,6 +104,7 @@ fn main() {
                             let str = &re.path[7..];
                             let mut file = File::create(format!("{}/{}", directory.clone(), str)).unwrap();
                             file.write_all(re.body.as_ref()).expect("TODO: panic message");
+                            _stream.write(b"HTTP/1.1 201 OK\r\n\r\n").expect("TODO: panic message");
 
                         }else {
                             _stream.write(not_found()).expect("TODO: panic message");
