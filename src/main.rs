@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::fmt::Error;
 use std::io::{Read, Write};
+use std::net::Shutdown::Both;
 // Uncomment this block to pass the first stage
 use std::net::TcpListener;
 
@@ -74,6 +75,7 @@ fn main() {
                             _stream.write(b"HTTP/1.1 404 Not Found\r\n\r\n").expect("TODO: panic message");
                         }
                     }}
+                    _stream.shutdown(Both).unwrap();
                 } else {
                     println!("Parse Error");
                 }
