@@ -51,11 +51,10 @@ fn main() {
                     dbg!(&re);
                     if re.path.starts_with("/echo/") {
                         let str = &re.path[6..];
-                        let m = format!("HTTP/1.1 200 OK\r
-                        Content-Type: text/plain\r
-                        Content-Length: {}\r
-                        \r
-                        {}\r", str.len(), str);
+                        dbg!(&str);
+                        let m = format!("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {}\r
+\r
+{}\r", str.len(), str);
                         _stream.write(m.as_bytes()).unwrap();
                     } else {
                     match re.path.as_str() {
