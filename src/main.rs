@@ -88,7 +88,7 @@ fn main() {
                             let mut contents = String::new();
                             fe.read_to_string(&mut contents).expect("TODO: panic message");
                             let resp = format!(
-                                "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {}\r\n\r\n{}",
+                                "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: {}\r\n\r\n{}",
                                 contents.len(),
                                 contents
                             );
