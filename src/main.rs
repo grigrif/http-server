@@ -49,6 +49,15 @@ fn main() {
                 let request = parse_request(string);
                 if let Ok(re) = request {
                     dbg!(&re);
+                    if re.path.starts_with("/echo/") {
+                        let str = &re.path[6..];
+                        let m = format!("HTTP/1.1 200 OK\r
+                        Content-Type: text/plain\r
+                        Content-Length: {}\r
+                        \r
+                        {}\r", str.len(), str);
+                        _stream.write(m.as_bytes()).unwrap();
+                    } else {
                     match re.path.as_str() {
                         "/" => {
                             _stream.write(b"HTTP/1.1 200 OK\r\n\r\n").expect("TODO: panic message");
@@ -57,7 +66,7 @@ fn main() {
                         _ => {
                             _stream.write(b"HTTP/1.1 404 Not Found\r\n\r\n").expect("TODO: panic message");
                         }
-                    }
+                    }}
                 } else {
                     println!("Parse Error");
                 }
