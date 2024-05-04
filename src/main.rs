@@ -1,11 +1,13 @@
 use std::collections::HashMap;
 use std::fmt::Error;
+use std::fs::File;
 use std::io::{Read, Write};
 use std::net::Shutdown::Both;
 // Uncomment this block to pass the first stage
 use std::net::TcpListener;
 use std::thread;
-
+use tokio::io::AsyncReadExt;
+use std::borrow::Borrow;
 #[derive(Debug)]
 struct HttpRequest {
     method: String,
@@ -39,18 +41,31 @@ fn plain_text(str: &str) -> String {
 \r
 {}\r", str.len(), str)
 }
+fn not_found() -> &'static [u8; 26] {
+    b"HTTP/1.1 404 Not Found\r\n\r\n"
+}
 //
 fn main() {
 
     // Uncomment this block to pass the first stage
     //
+    let args: Vec<String> = std::env::args().collect();
+    let mut directory = String::from("test");
+    for i in 0..args.len() {
+        if args.get(i).unwrap() == "--directory" {
+            directory = args.get(i+1).unwrap().clone();
+        }
+    }
+    println!("Serving files from directory: {}", &directory);
+
     let listener = TcpListener::bind("127.0.0.1:4221").unwrap();
     //
      for stream in listener.incoming() {
         match stream {
             Ok(mut _stream) => {
-                thread::spawn(move || {
+                let directory = directory.clone();
 
+                thread::spawn(move || {
                  println!("accepted new connection");
                 let mut rx_bytes = [0u8; 1024];
                 _stream.read(&mut rx_bytes).expect("TODO: panic message");
@@ -65,7 +80,28 @@ fn main() {
                         dbg!(&str);
                         let m = plain_text(str);
                         _stream.write(m.as_bytes()).unwrap();
-                    } else {
+                    }
+                    else if re.path.starts_with("/files/") {
+                        let str = &re.path[7..];
+                        let mut file = File::open(format!("{}/{}", directory.clone() ,str));
+                        if let Ok(mut fe) = file {
+                            let mut contents = String::new();
+                            fe.read_to_string(&mut contents).expect("TODO: panic message");
+                            let resp = format!(
+                                "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {}\r\n\r\n{}",
+                                contents.len(),
+                                contents
+                            );
+                            _stream.write(resp.as_bytes()).expect("");
+
+
+                        } else {
+                            _stream.write(not_found()).expect("TODO: panic message");
+                        }
+
+
+                    }
+                    else {
                     match re.path.as_str() {
                         "/" => {
                             _stream.write(b"HTTP/1.1 200 OK\r\n\r\n").expect("TODO: panic message");
@@ -75,7 +111,7 @@ fn main() {
                             _stream.write(plain_text(re.headers.get("User-Agent:").unwrap()).as_bytes()).expect("TODO: panic message");
                         }
                         _ => {
-                            _stream.write(b"HTTP/1.1 404 Not Found\r\n\r\n").expect("TODO: panic message");
+                            _stream.write(not_found()).expect("TODO: panic message");
                         }
                     }}
                     _stream.shutdown(Both).unwrap();
