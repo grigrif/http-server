@@ -33,6 +33,7 @@ fn parse_request(string: &str) -> Result<HttpRequest, Error> {
         map.insert(a.to_string(), b.to_string());
     }
     let body = lines.collect();
+    let (body, _) = body.split_once("\0");
    Ok (HttpRequest {
         method: method.to_string(), path: path.to_string(), http_version: http_version.to_string(), headers: map, body
     })
