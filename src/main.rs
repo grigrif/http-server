@@ -97,6 +97,8 @@ fn main() {
                                     contents
                                 );
                                 _stream.write(resp.as_bytes()).expect("");
+                            }   else {
+                                _stream.write(not_found()).expect("TODO: panic message");
                             }
 
 
@@ -107,24 +109,20 @@ fn main() {
                             file.write_all(re.body.as_ref()).expect("TODO: panic message");
                             _stream.write(b"HTTP/1.1 201 OK\r\n\r\n").expect("TODO: panic message");
 
-                        }else {
-                            _stream.write(not_found()).expect("TODO: panic message");
                         }
-
-
                     }
                     else {
-                    match re.path.as_str() {
-                        "/" => {
-                            _stream.write(b"HTTP/1.1 200 OK\r\n\r\n").expect("TODO: panic message");
+                        match re.path.as_str() {
+                            "/" => {
+                                _stream.write(b"HTTP/1.1 200 OK\r\n\r\n").expect("TODO: panic message");
 
-                        }
-                        "/user-agent" => {
-                            _stream.write(plain_text(re.headers.get("User-Agent:").unwrap()).as_bytes()).expect("TODO: panic message");
-                        }
-                        _ => {
-                            _stream.write(not_found()).expect("TODO: panic message");
-                        }
+                            }
+                            "/user-agent" => {
+                                _stream.write(plain_text(re.headers.get("User-Agent:").unwrap()).as_bytes()).expect("TODO: panic message");
+                            }
+                            _ => {
+                                _stream.write(not_found()).expect("TODO: panic message");
+                            }
                     }}
                     _stream.shutdown(Both).unwrap();
                 } else {
