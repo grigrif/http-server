@@ -31,6 +31,12 @@ fn parse_request(string: &str) -> Result<HttpRequest, Error> {
         method: method.to_string(), path: path.to_string(), http_version: http_version.to_string(), headers: map
     })
 }
+
+fn plain_text(str: &str) -> String {
+    format!("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {}\r
+\r
+{}\r", str.len(), str)
+}
 fn main() {
 
     // Uncomment this block to pass the first stage
@@ -52,15 +58,16 @@ fn main() {
                     if re.path.starts_with("/echo/") {
                         let str = &re.path[6..];
                         dbg!(&str);
-                        let m = format!("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {}\r
-\r
-{}\r", str.len(), str);
+                        let m = plain_text(str);
                         _stream.write(m.as_bytes()).unwrap();
                     } else {
                     match re.path.as_str() {
                         "/" => {
                             _stream.write(b"HTTP/1.1 200 OK\r\n\r\n").expect("TODO: panic message");
 
+                        }
+                        "/user-agent" => {
+                            _stream.write(plain_text(re.headers.get("User-Agent:").unwrap()).as_bytes()).expect("TODO: panic message");
                         }
                         _ => {
                             _stream.write(b"HTTP/1.1 404 Not Found\r\n\r\n").expect("TODO: panic message");
