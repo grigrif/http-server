@@ -4,6 +4,7 @@ use std::io::{Read, Write};
 use std::net::Shutdown::Both;
 // Uncomment this block to pass the first stage
 use std::net::TcpListener;
+use std::thread;
 
 #[derive(Debug)]
 struct HttpRequest {
@@ -48,6 +49,8 @@ fn main() {
      for stream in listener.incoming() {
         match stream {
             Ok(mut _stream) => {
+                thread::spawn(move || {
+
                  println!("accepted new connection");
                 let mut rx_bytes = [0u8; 1024];
                 _stream.read(&mut rx_bytes).expect("TODO: panic message");
@@ -79,7 +82,7 @@ fn main() {
                 } else {
                     println!("Parse Error");
                 }
-            }
+            });}
             Err(e) => {
                  println!("error: {}", e);
              }
