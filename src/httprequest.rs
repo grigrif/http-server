@@ -17,7 +17,6 @@ impl HttpRequest {
         let method = fe.split(" ").nth(0).ok_or(Error)?;
         let path = fe.split(" ").nth(1).ok_or(Error)?;
         let http_version = fe.split(" ").nth(2).ok_or(Error)?;
-        println!("za");
         let mut map = HashMap::new();
         while let Some(l) = lines.next() {
             if l.is_empty() {

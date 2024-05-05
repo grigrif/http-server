@@ -2,32 +2,17 @@ mod httprequest;
 mod response;
 mod router;
 
-use std::collections::HashMap;
-use std::fmt::Error;
-use std::fs::File;
 use std::io::{Read, Write};
 use std::net::Shutdown::Both;
-// Uncomment this block to pass the first stage
 use std::net::TcpListener;
 use std::thread;
-use tokio::io::AsyncReadExt;
-use std::borrow::Borrow;
 use crate::httprequest::HttpRequest;
-use crate::response::Response;
-use crate::router::{build_route, Route, Router};
+use crate::router::{build_route};
 
 
-fn plain_text(str: &str) -> String {
-    format!("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {}\r
-\r
-{}\r", str.len(), str)
-}
-fn not_found() -> &'static [u8; 26] {
-    b"HTTP/1.1 404 Not Found\r\n\r\n"
-}
+
 //
 fn main() {
-    let one = || 1;
 
     // Uncomment this block to pass the first stage
     //
@@ -42,12 +27,12 @@ fn main() {
 
     let listener = TcpListener::bind("127.0.0.1:4221").unwrap();
 
-    let mut router = build_route();
+    let router = build_route();
 
      for stream in listener.incoming() {
         match stream {
             Ok(mut _stream) => {
-                let DIRECTORY = directory.clone();
+                let directory = directory.clone();
                 let router = router.clone();
 
                 thread::spawn(move || {
@@ -59,7 +44,7 @@ fn main() {
 
                 let request = HttpRequest::parse_request(string);
                 if let Ok(re) = request {
-                    let res = router.match_request(re, &DIRECTORY);
+                    let res = router.match_request(re, &directory);
                     _stream.write(res.to_string().as_bytes()).expect("zadzd");
                 }
                  else {

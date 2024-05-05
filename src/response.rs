@@ -1,6 +1,4 @@
 use std::collections::HashMap;
-use std::hash::Hash;
-use std::ops::Add;
 
 pub struct Response {
     response_code: usize,

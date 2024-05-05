@@ -37,13 +37,13 @@ pub fn build_route() -> Router {
             let binding = req.clone().headers();
             let str = &req.path[7..];
             let directory = binding.get("directory").unwrap();
-            let mut file = File::open(format!("{}/{}", directory, str));
+            let file = File::open(format!("{}/{}", directory, str));
             if let Ok(mut fe) = file {
                 let mut contents = String::new();
                 fe.read_to_string(&mut contents).expect("TODO: panic message");
                     Response::ok_with_body(&contents)
                 } else {
-                    Response::ok_with_body(str)
+                    Response::not_found()
                 }
         })
     );
@@ -57,7 +57,7 @@ pub fn build_route() -> Router {
         })
     );
     router.add_route(
-        Route::new("GET", "/", |req| {
+        Route::new("GET", "/", |_| {
             Response::ok()
         })
     );
