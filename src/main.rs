@@ -37,7 +37,7 @@ fn main() {
 
                 thread::spawn(move || {
                  println!("accepted new connection");
-                let mut rx_bytes = [0u8; 1024];
+                let mut rx_bytes = [0u8; 40024];
                 _stream.read(&mut rx_bytes).expect("TODO: panic message");
                 let string = std::str::from_utf8(&rx_bytes).expect("valid utf8");
 
