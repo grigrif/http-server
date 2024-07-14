@@ -1,52 +1,51 @@
 use std::collections::HashMap;
+use flate2::write::GzEncoder;
+use nom::AsBytes;
 
 #[derive(Clone)]
 pub struct Response {
     response_code: usize,
     pub headers: HashMap<String, String>,
-    body: Option<String>
+    pub body: Option<Vec<u8>>
 }
 
 
 
 impl Response {
-    pub fn to_string(self) -> String {
-        let mut lines = Vec::new();
+    pub fn to_string(self) -> Vec<u8> {
+        let mut buffer = Vec::new();
         let first_line = match self.response_code {
             200 => {
-                "HTTP/1.1 200 OK"
+                "HTTP/1.1 200 OK\r\n"
             },
             201 => {
-                "HTTP/1.1 201 Created"
+                "HTTP/1.1 201 Created\r\n"
             },
             404 => {
-                "HTTP/1.1 404 Not Found"
+                "HTTP/1.1 404 Not Found\r\n"
             }
 
             _ => {
-                "HTTP/1.1 500 Not Found"
+                "HTTP/1.1 500 Not Found\r\n"
             }
         }.to_string();
 
-        lines.push(first_line);
+        buffer.extend(first_line.as_bytes());
 
         for (k, v) in &(self.headers) {
-            lines.push(format!("{}: {}", &k, &v));
+            buffer.extend(format!("{}: {}", &k, &v).as_bytes());
+            buffer.extend("\r\n".to_string().as_bytes());
         }
-        let l = self.headers.len();
-        if l == 0 {
-            lines.push("\r\n".to_string());
+        buffer.extend("\r\n".to_string().as_bytes());
 
-        } else {
-            lines.push("".to_string());
-        }
+
         if let Some(body) = self.body {
-            lines.push(body);
-            return lines.join("\r\n");
+            println!("body");
+            buffer.extend(body);
 
         }
 
-        lines.join("\r\n")
+        buffer
 
     }
 
@@ -71,9 +70,9 @@ impl Response {
     pub fn ok_with_body(body: &str) -> Response {
         let mut m = Response::new();
         m.response_code = 200;
-        m.body = Some(body.to_string());
+        m.body = Some(Vec::from(body.as_bytes()));
         m.headers.insert("Content-Type".to_string(), "text/plain".to_string());
-
+        println!("{body}");
         m.headers.insert("Content-Length".to_string(), body.len().to_string());
         return m;
     }
@@ -88,7 +87,7 @@ impl Response {
         m.response_code = 200;
         m.headers.insert("Content-Type".to_string(), "application/octet-stream".to_string());
         m.headers.insert("Content-Length".to_string(), body.len().to_string());
-        m.body = Some(body);
+        m.body = Some(body.into_bytes());
         return m;
     }
 

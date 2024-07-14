@@ -45,7 +45,7 @@ fn main() {
                 let request = HttpRequest::parse_request(string);
                 if let Ok(re) = request {
                     let res = router.match_request(re, &directory);
-                    _stream.write(res.to_string().as_bytes()).expect("zadzd");
+                    _stream.write(res.to_string().as_slice()).expect("zadzd");
                 }
                  else {
                     println!("Parse Error");

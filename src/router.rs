@@ -1,5 +1,7 @@
 use std::fs::File;
 use std::io::{Read, Write};
+use flate2::Compression;
+use flate2::write::GzEncoder;
 use itertools::Itertools;
 use crate::httprequest::HttpRequest;
 use crate::response::Response;
@@ -69,7 +71,15 @@ fn encoding(http_request: &HttpRequest, response: Response) -> Response {
         if s.split(", ").contains(&"gzip") {
             let mut res = response.clone();
             res.headers.insert("Content-Encoding".parse().unwrap(), "gzip".parse().unwrap());
+            if let Some(body) = &(res.body) {
+                let mut e = GzEncoder::new(Vec::new(), Compression::default());
+                e.write_all(body).unwrap();
+                let b =  e.finish().unwrap();
+                res.headers.insert("Content-Length".to_string(), b.len().to_string());
+                res.body = Some(b);
+            }
             return res
+
         }
     }
     return response;
