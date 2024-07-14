@@ -90,7 +90,7 @@ impl Router {
                 return encoding(&http_request, (route.func)(&h));
             }
         }
-        return Response::ok_with_body(&"router error");
+        return Response::not_found();
     }
 
     pub fn add_route(&mut self, route: Route) {
