@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 
+#[derive(Clone)]
 pub struct Response {
     response_code: usize,
-    headers: HashMap<String, String>,
+    pub headers: HashMap<String, String>,
     body: Option<String>
 }
 

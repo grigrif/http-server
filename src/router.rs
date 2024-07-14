@@ -63,6 +63,17 @@ pub fn build_route() -> Router {
     );
     return router
 }
+
+fn encoding(http_request: &HttpRequest, response: Response) -> Response {
+    if let Some(s) = http_request.headers.get("Accept-Encoding")  {
+        if s == "gzip" {
+            let mut res = response.clone();
+            res.headers.insert("Content-Encoding".parse().unwrap(), "gzip".parse().unwrap());
+            return res
+        }
+    }
+    return response;
+}
 impl Router {
     pub fn match_request(self, http_request: HttpRequest, directory: &String) -> Response {
         let mut h = http_request.clone();
@@ -72,11 +83,11 @@ impl Router {
                 continue;
             }
             if route.path.ends_with("*") && http_request.path.starts_with(&route.path[..(route.path.len()-1)]){
-                return (route.func)(&h);
+                return encoding(&http_request, (route.func)(&h));
             }
 
             if  route.path == http_request.path {
-                return (route.func)(&h);
+                return encoding(&http_request, (route.func)(&h));
             }
         }
         return Response::ok_with_body(&"router error");
