@@ -33,7 +33,7 @@ impl Response {
         for (k, v) in self.headers {
             lines.push(format!("{}: {}", &k, &v));
         }
-        lines.push("".to_string());
+        lines.push("\r\n".to_string());
         if let Some(body) = self.body {
             lines.push(body);
             return lines.join("\r\n");
