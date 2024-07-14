@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::{Read, Write};
+use itertools::Itertools;
 use crate::httprequest::HttpRequest;
 use crate::response::Response;
 #[derive(Clone)]
@@ -65,7 +66,7 @@ pub fn build_route() -> Router {
 }
 fn encoding(http_request: &HttpRequest, response: Response) -> Response {
     if let Some(s) = http_request.headers.get("Accept-Encoding")  {
-        if s == "gzip" {
+        if s.split(", ").contains(&"gzip") {
             let mut res = response.clone();
             res.headers.insert("Content-Encoding".parse().unwrap(), "gzip".parse().unwrap());
             return res
