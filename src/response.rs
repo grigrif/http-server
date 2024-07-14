@@ -72,6 +72,8 @@ impl Response {
         let mut m = Response::new();
         m.response_code = 200;
         m.body = Some(body.to_string());
+        m.headers.insert("Content-Type".to_string(), "text/plain".to_string());
+
         m.headers.insert("Content-Length".to_string(), body.len().to_string());
         return m;
     }
