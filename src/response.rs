@@ -30,10 +30,16 @@ impl Response {
 
         lines.push(first_line);
 
-        for (k, v) in self.headers {
+        for (k, v) in &(self.headers) {
             lines.push(format!("{}: {}", &k, &v));
         }
-        lines.push("\r\n".to_string());
+        let l = self.headers.len();
+        if l == 0 {
+            lines.push("\r\n".to_string());
+
+        } else {
+            lines.push("".to_string());
+        }
         if let Some(body) = self.body {
             lines.push(body);
             return lines.join("\r\n");
