@@ -22,7 +22,7 @@ pub fn build_route() -> Router {
 
             let user_agent = binding.get("User-Agent");
             if let Some(user_agent) = user_agent {
-                return Response::ok_with_body(user_agent)
+                return Response::octet_stream(user_agent.clone())
             }
             Response::ok()
         })
