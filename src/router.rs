@@ -63,7 +63,6 @@ pub fn build_route() -> Router {
     );
     return router
 }
-
 fn encoding(http_request: &HttpRequest, response: Response) -> Response {
     if let Some(s) = http_request.headers.get("Accept-Encoding")  {
         if s == "gzip" {
