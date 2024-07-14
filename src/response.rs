@@ -17,7 +17,7 @@ impl Response {
                 "HTTP/1.1 200 OK"
             },
             201 => {
-                "HTTP/1.1 200 OK"
+                "HTTP/1.1 201 Created"
             },
             404 => {
                 "HTTP/1.1 404 Not Found"
