@@ -41,7 +41,7 @@ pub fn build_route() -> Router {
             if let Ok(mut fe) = file {
                 let mut contents = String::new();
                 fe.read_to_string(&mut contents).expect("TODO: panic message");
-                    Response::ok_with_body(&contents)
+                    Response::octet_stream(contents)
                 } else {
                     Response::not_found()
                 }
