@@ -1,6 +1,4 @@
 use std::collections::HashMap;
-use flate2::write::GzEncoder;
-use nom::AsBytes;
 
 #[derive(Clone)]
 pub struct Response {
@@ -79,6 +77,16 @@ impl Response {
     pub fn ok_201() -> Response {
         let mut m = Response::new();
         m.response_code = 201;
+        return m;
+    }
+
+    pub fn html(body: &str) -> Response {
+        let mut m = Response::new();
+        m.response_code = 201;
+        m.body = Some(Vec::from(body.as_bytes()));
+        m.headers.insert("Content-Type".to_string(), "text/html".to_string());
+        m.headers.insert("Content-Length".to_string(), body.len().to_string());
+
         return m;
     }
 

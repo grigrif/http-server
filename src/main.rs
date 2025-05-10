@@ -14,8 +14,6 @@ use crate::router::{build_route};
 //
 fn main() {
 
-    // Uncomment this block to pass the first stage
-    //
     let args: Vec<String> = std::env::args().collect();
     let mut directory: String = String::from("test");
     for i in 0..args.len() {

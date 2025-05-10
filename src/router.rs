@@ -18,7 +18,11 @@ pub struct Route {
 
 pub fn build_route() -> Router {
     let mut router = Router::new();
-
+    router.add_route(
+        Route::new("GET", "/", |_| {
+            return Response::html("<html><h1>Server Web Test</h1></html>")
+        })
+    );
     router.add_route(
         Route::new("GET", "/user-agent", |req| {
            let binding = req.clone().headers();
@@ -31,7 +35,7 @@ pub fn build_route() -> Router {
         })
     );
     router.add_route(
-        Route::new("GET", "/echo/*", |req| {
+        Route::new("GET", "/say/*", |req| {
             Response::ok_with_body(&req.path[6..])
         })
     );
@@ -40,7 +44,8 @@ pub fn build_route() -> Router {
             let binding = req.clone().headers();
             let str = &req.path[7..];
             let directory = binding.get("directory").unwrap();
-            let file = File::open(format!("{}/{}", directory, str));
+            println!("{}", str);
+            let file: Result<File, std::io::Error> = File::open(format!("{}/{}", directory, str));
             if let Ok(mut fe) = file {
                 let mut contents = String::new();
                 fe.read_to_string(&mut contents).expect("TODO: panic message");
@@ -51,7 +56,7 @@ pub fn build_route() -> Router {
         })
     );
     router.add_route(
-        Route::new("POST", "/files/*", |req| {
+        Route::new("POST", "/file/*", |req| {
             let str = &req.path[7..];
             let directory = req.headers.get("directory").unwrap();
             let mut file = File::create(format!("{}/{}", directory, str)).unwrap();
@@ -59,11 +64,7 @@ pub fn build_route() -> Router {
             Response::ok_201()
         })
     );
-    router.add_route(
-        Route::new("GET", "/", |_| {
-            Response::ok()
-        })
-    );
+   
     return router
 }
 fn encoding(http_request: &HttpRequest, response: Response) -> Response {
